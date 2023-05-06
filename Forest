@@ -1,0 +1,12 @@
+	$rows[0] = array();
+		array_push($rows[0], count($rowNames));
+		array_push($rows[0], 'Сотрудники');
+		$rows[1] = array();
+		$result = $db_connection->prepare("select a.id, concat(a.name, ' (', DATE_FORMAT(a.startDate, '%d.%m.%Y'), ' - ', DATE_FORMAT(a.endDate, '%d.%m.%Y'), ')') as name from projects_stages a INNER JOIN projects_stageUserTypes tt on tt.projectStagesId = a.id and (tt.userTypesId = (SELECT userTypesId FROM users WHERE id = ?) OR (tt.userTypesId = 1 AND (SELECT userTypesId FROM users WHERE id = ?) IN (3, 4, 6)) OR (SELECT userTypesId FROM users WHERE id = ?) IN (5)) where a.projectsId=? and DATEDIFF(NOW(), a.startDate)>=0");
+		$result->bind_param('iiii', $employeeId, $employeeId, $employeeId, $projectId);
+		$result->execute();
+		$result->bind_result($stageId, $stageName);
+		while($result->fetch())
+		{
+			array_push($stages, array("id" => $stageId, "name" => $stageName));
+		}
